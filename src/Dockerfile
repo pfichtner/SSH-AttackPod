@@ -1,5 +1,5 @@
 # Stage 1: Build stage
-FROM ubuntu:20.04 as builder
+FROM ubuntu:22.04 AS builder
 
 # Set environment variable for non-interactive installations
 ENV DEBIAN_FRONTEND=noninteractive
@@ -26,7 +26,7 @@ RUN sed -i -e 's/^# deb-src/deb-src/' /etc/apt/sources.list && \
     apt-get clean && apt-get autoremove -y
 
 # Stage 2: Runtime stage
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Set environment variable for non-interactive installations
 ENV DEBIAN_FRONTEND=noninteractive
