@@ -6,7 +6,11 @@ from datetime import datetime
 import threading
 import time
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    encoding="utf-8",
+    level=logging.INFO,
+    format="%(asctime)s %(message)s"
+)
 
 def get_env(key, fallback):
     env = os.getenv(key, default=fallback)
@@ -14,27 +18,28 @@ def get_env(key, fallback):
 
 
 def get_local_ip():
-    retry_counter = 0
-    while retry_counter < 50:
+    url = f"{get_env('NETWATCH_COLLECTOR_URL', 'https://api.netwatch.team')}/check_ip"
+    for attempt in range(50):
         try:
-            response = requests.get("{}/check_ip".format(get_env("NETWATCH_COLLECTOR_URL", "https://api.netwatch.team")))
+            response = requests.get(url, timeout=5)
             if response.status_code == 200:
-                logging.info("Got the following local IP: {}".format(response.json().get("ip")))
-                return response.json().get("ip")
-            else:
-                logging.error(
-                    "[!] Got a non 200 status code from the netwatch backend: {} with message: {}".format(response.status_code,
-                                                                                                   response.text))
-        except Exception as e:
-            logging.error("[!] Got an exception while trying to get the local IP: {}".format(e))
+                local_ip = response.json().get("ip")
+                logging.info(f"Got the following local IP: {local_ip}")
+                return local_ip
 
-        retry_counter += 1
+            logging.error(f"[!] Got a non 200 status code from the netwatch backend: {response.status_code}, message: {response.text}")
+
+        except requests.RequestException as e:
+            logging.error(f"[!] Got a request exception while trying to get the local IP: {e}")
+
+        except Exception as e:
+            logging.error(f"[!] Got an exception while trying to get the local IP: {e}")
+
         time.sleep(10)
 
-    logging.error(
-        "[!] The system was unable to get the local IP for {} times. Sensor can not work without local IP => Exit".format(
-            retry_counter))
-    exit()
+    logging.error("[!] The system was unable to get the local IP. Sensor can not work without local IP => Exit with code 1")
+    exit(1)
+
 
 def submit_attack(ip, user, password, evidence, ATTACKPOD_LOCAL_IP):
     json = {"source_ip": ip,
@@ -46,27 +51,24 @@ def submit_attack(ip, user, password, evidence, ATTACKPOD_LOCAL_IP):
             "attack_type": "SSH_BRUTE_FORCE",
             }
 
-    header = {"authorization": get_env("NETWATCH_COLLECTOR_AUTHORIZATION", "")}
 
-    retry_counter = 0
-    while retry_counter < 5:
+    url = f"{get_env('NETWATCH_COLLECTOR_URL', '')}/add_attack"
+    headers = {"authorization": get_env("NETWATCH_COLLECTOR_AUTHORIZATION", "")}
+
+    for attempt in range(5):
         try:
-            response = requests.post("{}/add_attack".format(get_env("NETWATCH_COLLECTOR_URL", "")),
-                                     json=json,
-                                     headers=header)
+            response = requests.post(url, json=json, headers=headers, timeout=5)
             if response.status_code == 200:
-                logging.info("Reported the following json to the netwatch collector: {}".format(json))
+                logging.info(f"Reported the following JSON to the NetWatch collector: {json}")
                 return
-            else:
-                logging.error("[!] Got a non 200 status code from the collector: {} with message: {}".format(response.status_code, response.text))
+
+            logging.error(f"[!] Got a non 200 status code from the collector: {response.status_code} with message: {response.text}")
+
+        except requests.RequestException as e:
+            logging.error(f"[!] Got a request exception while submitting the attack: {e}")
+
         except Exception as e:
-            logging.error("[!] Got an exception while submitting the attack to the collector: {}".format(e))
-
-        retry_counter += 1
-        time.sleep(10)
-
-    logging.error("[!] The system was unable to submit the attack to the collector for {} times. Skipping this one!".format(retry_counter))
-
+            logging.error(f"[!] Got an exception while submitting the attack: {e}")
 
 def run_sshd():
     while True:
@@ -75,10 +77,8 @@ def run_sshd():
 
 def rotate_sshd_keys():
     os.system("rm -f /etc/ssh/ssh_host_*")
-    os.system("ssh-keygen -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key")
-    os.system("ssh-keygen -t ecdsa -b 521 -f /etc/ssh/ssh_host_ecdsa_key")
-    os.system("ssh-keygen -t ecdsa -b 521 -f /etc/ssh/ssh_host_ecdsa_key")
-
+    os.system("ssh-keygen -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key -N ''")
+    os.system("ssh-keygen -t ecdsa -b 521 -f /etc/ssh/ssh_host_ecdsa_key -N ''")
 
 if __name__ == '__main__':
     logging.info("[+] Starting NetWatch Attackpod")
