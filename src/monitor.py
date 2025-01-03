@@ -6,7 +6,7 @@ from datetime import datetime
 import threading
 import time
 
-logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 def get_env(key, fallback):
     env = os.getenv(key, default=fallback)
@@ -51,7 +51,7 @@ def submit_attack(ip, user, password, evidence, ATTACKPOD_LOCAL_IP):
     retry_counter = 0
     while retry_counter < 5:
         try:
-            response = requests.post("{}/add_attack".format(get_env("NETWATCH_COLLECTOR_URL", "http://net_watch_collector:8080")),
+            response = requests.post("{}/add_attack".format(get_env("NETWATCH_COLLECTOR_URL", "")),
                                      json=json,
                                      headers=header)
             if response.status_code == 200:
@@ -74,6 +74,7 @@ def run_sshd():
 
 
 def rotate_sshd_keys():
+    os.system("rm -f /etc/ssh/ssh_host_*")
     os.system("ssh-keygen -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key")
     os.system("ssh-keygen -t ecdsa -b 521 -f /etc/ssh/ssh_host_ecdsa_key")
     os.system("ssh-keygen -t ecdsa -b 521 -f /etc/ssh/ssh_host_ecdsa_key")
@@ -82,7 +83,12 @@ def rotate_sshd_keys():
 if __name__ == '__main__':
     logging.info("[+] Starting NetWatch Attackpod")
     logging.info("[+] Getting local ip")
-    ATTACKPOD_LOCAL_IP = get_local_ip()
+
+    if os.getenv("ATTACK_POD_IP") is not None:
+        ATTACKPOD_LOCAL_IP = get_env("ATTACK_POD_IP","")
+    else:
+        ATTACKPOD_LOCAL_IP = get_local_ip()
+    
     logging.info("[+] Got the local ip of {} for the AttackPod".format(ATTACKPOD_LOCAL_IP))
 
     logging.info("[+] Rotating SSHD Keys")

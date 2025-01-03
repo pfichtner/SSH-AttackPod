@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  NetWatchSSH:
+  NetWatchSSHAttackPod:
     image: netwatch_ssh-attackpod:latest
     container_name: netwatch_ssh-attackpod
     environment:
