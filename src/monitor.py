@@ -53,7 +53,7 @@ def submit_attack(ip, user, password, evidence, ATTACKPOD_LOCAL_IP):
 
 
     url = f"{get_env('NETWATCH_COLLECTOR_URL', '')}/add_attack"
-    header = {"authorization": get_env("NETWATCH_COLLECTOR_AUTHORIZATION", "")}
+    headers = {"authorization": get_env("NETWATCH_COLLECTOR_AUTHORIZATION", "")}
 
     for attempt in range(5):
         try:
