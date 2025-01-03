@@ -46,7 +46,7 @@ def submit_attack(ip, user, password, evidence, ATTACKPOD_LOCAL_IP):
             "attack_type": "SSH_BRUTE_FORCE",
             }
 
-    header = {"authorization": get_env("NETWATCH_COLLECTOR_AUTHORIZATINON", "")}
+    header = {"authorization": get_env("NETWATCH_COLLECTOR_AUTHORIZATION", "")}
 
     retry_counter = 0
     while retry_counter < 5:

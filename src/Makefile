@@ -1,7 +1,7 @@
 all: build-docker upload-docker
 
 build-docker:
-	docker build -t docker.k0nig.de/netwatch_ssh_attack_pod:9.9 .
+	docker build -t netwatch_ssh-attackpod:latest -t netwatch_ssh-attackpod:8.2 .
 
 upload-docker:
-	docker push docker.k0nig.de/netwatch_ssh_attack_pod:9.9
+	docker push netwatch_ssh-attackpod:latest
