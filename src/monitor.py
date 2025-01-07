@@ -5,6 +5,9 @@ import os
 from datetime import datetime
 import threading
 import time
+import subprocess
+import signal
+
 
 logging.basicConfig(
     encoding="utf-8",
@@ -70,9 +73,28 @@ def submit_attack(ip, user, password, evidence, ATTACKPOD_LOCAL_IP):
         except Exception as e:
             logging.error(f"[!] Got an exception while submitting the attack: {e}")
 
+
+def reap_children(signum, frame):
+    try:
+        while True:
+            pid, _ = os.waitpid(-1, os.WNOHANG)
+            if pid == 0:
+                break
+            logging.info(f"Reaped child process with PID {pid}")
+    except ChildProcessError:
+        pass
+
+signal.signal(signal.SIGCHLD, reap_children)
+
+
 def run_sshd():
     while True:
-        os.system("/sbin/sshd -D -E /var/log/ssh.log")
+        try:
+            process = subprocess.Popen(["/usr/sbin/sshd", "-D", "-E", "/var/log/ssh.log"])
+            process.wait()  # Wait for the process to terminate and reap it
+        except Exception as e:
+            logging.error(f"Error while running sshd: {e}")
+            time.sleep(1)  # Avoid tight loop if something goes wrong
 
 
 def rotate_sshd_keys():
