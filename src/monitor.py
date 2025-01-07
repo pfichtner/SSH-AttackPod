@@ -17,6 +17,13 @@ def get_env(key, fallback):
     return env
 
 
+def _check_if_in_test_mode():
+    if get_env("NETWATCH_TEST_MODE", False) is not False:
+        return True
+    
+    return False
+
+
 def get_local_ip():
     url = f"{get_env('NETWATCH_COLLECTOR_URL', 'https://api.netwatch.team')}/check_ip"
     for attempt in range(50):
@@ -49,8 +56,8 @@ def submit_attack(ip, user, password, evidence, ATTACKPOD_LOCAL_IP):
             "attack_timestamp": datetime.now().isoformat(),
             "evidence":evidence,
             "attack_type": "SSH_BRUTE_FORCE",
+            "test_mode":_check_if_in_test_mode()
             }
-
 
     url = f"{get_env('NETWATCH_COLLECTOR_URL', '')}/add_attack"
     headers = {"authorization": get_env("NETWATCH_COLLECTOR_AUTHORIZATION", "")}
@@ -59,7 +66,12 @@ def submit_attack(ip, user, password, evidence, ATTACKPOD_LOCAL_IP):
         try:
             response = requests.post(url, json=json, headers=headers, timeout=5)
             if response.status_code == 200:
-                logging.info(f"Reported the following JSON to the NetWatch collector: {json}")
+
+                if _check_if_in_test_mode():
+                    logging.info(f"Reported the following JSON to the NetWatch collector IN TEST MODE ATTACK WILL NOT BE SAVED: {json}")
+                else:
+                    logging.info(f"Reported the following JSON to the NetWatch collector: {json}")
+
                 return
 
             logging.error(f"[!] Got a non 200 status code from the collector: {response.status_code} with message: {response.text}")
@@ -82,6 +94,16 @@ def rotate_sshd_keys():
 
 if __name__ == '__main__':
     logging.info("[+] Starting NetWatch Attackpod")
+    
+    if _check_if_in_test_mode():
+        logging.info("################################")
+        logging.info("################################")
+        logging.info("###   !Sensor in test mode!   ##")
+        logging.info("### Attacks will be submitted ##")
+        logging.info("###       but NOT SAVED       ##")
+        logging.info("################################")
+        logging.info("################################")
+
     logging.info("[+] Getting local ip")
 
     if os.getenv("ATTACK_POD_IP") is not None:
