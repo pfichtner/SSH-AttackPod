@@ -126,7 +126,7 @@ if __name__ == '__main__':
                     ip = ""
                     user = ""
                     password = ""
-                    evicence = ""
+                    evidence = ""
 
                 user = output[0][0]
                 password = output[0][1]
