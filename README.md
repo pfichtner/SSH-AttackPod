@@ -43,29 +43,6 @@ sudo systemctl restart sshd
 ```
 Alternatively, you can reboot your system.
 
-### 3. Import the AttackPod
-Download the latest version of the SSH-AttackPod from GitHub. To download it directly to your system, use:
-
-```bash
-wget https://github.com/NetWatch-team/SSH-AttackPod/releases/download/8.2/netwatch_ssh-attackpod.8.2
-```
-Once downloaded, import the image into Docker:
-
-```bash
-docker image load -i netwatch_ssh-attackpod.8.2
-```
-You should now see the image listed with:
-
-```bash
-docker image ls
-```
-Example output:
-
-```bash
-REPOSITORY                                           TAG         IMAGE ID       CREATED             SIZE
-netwatch_ssh-attackpod                               latest      2e98e1d12901   40 minutes ago      132MB
-```
-
 ### 4. Configure the SSH-AttackPod
 Create a folder for the SSH-AttackPod at your preferred location. For this example, we’ll use /opt/:
 
@@ -80,11 +57,12 @@ echo 'version: "3"
 
 services:
   NetWatchSSHAttackPod:
-    image: netwatch_ssh-attackpod:latest
+    image: netwatchteam/netwatch_ssh-attackpod:latest
     container_name: netwatch_ssh-attackpod 
     environment:
       NETWATCH_COLLECTOR_AUTHORIZATION: ${NETWATCH_COLLECTOR_AUTHORIZATION}
       NETWATCH_COLLECTOR_URL: "https://api.netwatch.team"
+      #NETWATCH_TEST_MODE: True
     restart: unless-stopped
     ports:
       - "22:22"
@@ -116,3 +94,8 @@ docker compose up -d --force-recreate && docker compose logs -tf
 ```
 
 This will start the container in detached mode and display the logs. To check if everything is working as expected, you can monitor the logs. When you're finished reviewing, you can stop the log output with Ctrl + C.
+
+
+### 6. [Optional] Test the SSH-AttackPod
+If you want to test whether the AttackPod is working as expected, you can enable *TEST_MODE* by removing the `#` in the `docker-compose.yml` file. This will configure the AttackPod to register and submit the attacks, but the backend will discard themand not take further action.
+Please remember to revert this change once you have completed your testing!
