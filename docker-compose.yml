@@ -2,6 +2,8 @@ version: "3"
 
 services:
   NetWatchSSHAttackPod:
+    build:
+      context: src
     image: netwatch_ssh-attackpod:latest
     container_name: netwatch_ssh-attackpod
     environment:
