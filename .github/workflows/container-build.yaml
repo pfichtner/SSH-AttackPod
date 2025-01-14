@@ -81,6 +81,17 @@ jobs:
               load: true
               push: false
 
+        - name: Run integration tests
+          env:
+            DOCKER_IMAGE_TAG: ${{ env.VERSIONED_IMAGE_FQN }}
+          run: |
+            # Install dependencies
+            python -m pip install --upgrade pip
+            pip install -r tests/requirements.txt
+
+            # Run python based integration tests via pytest
+            pytest tests/
+
         - name: Login to GHCR
           uses: docker/login-action@v3
           with:
