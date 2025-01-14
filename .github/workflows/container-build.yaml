@@ -83,7 +83,7 @@ jobs:
 
         - name: Run integration tests
           env:
-            DOCKER_IMAGE_TAG: ${{ env.VERSIONED_IMAGE_FQN }}
+            DOCKER_IMAGE_FQN: ${{ env.VERSIONED_IMAGE_FQN }}
           run: |
             # Install dependencies
             python -m pip install --upgrade pip

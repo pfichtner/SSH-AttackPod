@@ -91,9 +91,9 @@ def docker_container(mock_server):
     client = docker.from_env()
 
     # Run the container with a dynamically assigned host port for SSH in the netwatch_ssh_attackpod_ci_network
-    docker_image_tag = os.getenv("DOCKER_IMAGE_TAG", "latest")
+    docker_image_fqn = os.getenv("DOCKER_IMAGE_FQN", "netwatch_ssh-attackpod:latest")
     container = client.containers.run(
-        f"netwatch_ssh-attackpod:{docker_image_tag}",
+        docker_image_fqn,
         detach=True,
         auto_remove=True,
         ports={"22/tcp": None},
