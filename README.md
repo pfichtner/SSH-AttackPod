@@ -16,7 +16,7 @@ To run a SSH-AttackPod you need an API-key to be able to submit your results. To
 
  - Go to [NetWatch community](https://community.netwatch.team/community)
  - Click: **Join the community**. 
- - Enter your *email address* and you will receive your API key
+ - Enter your *email address* and you will receive your API-key
 
 #### 2. Download the SSH-AttackPod
 
