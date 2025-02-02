@@ -1,0 +1,58 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            include:
+                - arch: amd64
+                - arch: arm64
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build image repo name
+        run: |
+          version=""
+          overwrite_latest=""
+          if [ -n "${{ github.event.inputs.image_tag_version }}" ]; then
+              # use input string as version
+              version="${{ github.event.inputs.image_tag_version }}"
+              overwrite_latest="${{ github.event.inputs.override_latest }}"
+          else
+              # use git tag as version
+              version="${{ github.ref_name }}"
+              overwrite_latest="true"
+          fi
+
+          if [ -z "$version" ] || [ -z "$overwrite_latest" ]; then
+              echo "Image tag version or overwrite_latest flag could not be determined"
+              exit 1
+          fi
+
+          repo="${{ github.repository }}"
+          echo VERSIONED_IMAGE_FQN="ghcr.io/${repo,,}:$version-${{ matrix.arch }}" >> $GITHUB_ENV
+          echo LATEST_IMAGE_FQN="ghcr.io/${repo,,}:latest-${{ matrix.arch }}" >> $GITHUB_ENV
+          echo OVERWRITE_LATEST="$overwrite_latest" >> $GITHUB_ENV
+
+      - name: Install Test Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tests/requirements.txt
+
+      - name: Run python based integration tests via pytest
+        with:
+          DOCKER_IMAGE_FQN: ${{ env.VERSIONED_IMAGE_FQN }}
+        run: |
+          pytest tests/
