@@ -23,9 +23,9 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-          uses: docker/setup-buildx-action@v3
-          with:
-            platforms: linux/${{ matrix.arch }}
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/${{ matrix.arch }}
 
       - name: Build image repo name
         run: |
@@ -52,16 +52,16 @@ jobs:
           echo OVERWRITE_LATEST="$overwrite_latest" >> $GITHUB_ENV
 
       - name: Docker build
-          uses: docker/build-push-action@v6
-          with:
-            context: src
-            file: src/Dockerfile
-            platforms: linux/${{ matrix.arch }}
-            tags: |
-              ${{ env.VERSIONED_IMAGE_FQN }}
-              ${{ env.LATEST_IMAGE_FQN }}
-            load: true
-            push: false
+        uses: docker/build-push-action@v6
+        with:
+          context: src
+          file: src/Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          tags: |
+            ${{ env.VERSIONED_IMAGE_FQN }}
+            ${{ env.LATEST_IMAGE_FQN }}
+          load: true
+          push: false
 
       - name: Install Test Dependencies
         run: |
