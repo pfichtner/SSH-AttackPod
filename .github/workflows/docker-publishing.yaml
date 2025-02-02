@@ -82,7 +82,7 @@ jobs:
             push: false
 
         - name: Run integration tests
-          with:
+          env:
             DOCKER_IMAGE_FQN: ${{ env.VERSIONED_IMAGE_FQN }}
           run: |
             # Install dependencies

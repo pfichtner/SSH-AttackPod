@@ -52,7 +52,7 @@ jobs:
           pip install -r tests/requirements.txt
 
       - name: Run python based integration tests via pytest
-        with:
+        env:
           DOCKER_IMAGE_FQN: ${{ env.VERSIONED_IMAGE_FQN }}
         run: |
           pytest tests/
