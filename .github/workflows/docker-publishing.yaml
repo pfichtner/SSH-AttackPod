@@ -72,14 +72,14 @@ jobs:
         - name: Docker build
           uses: docker/build-push-action@v6
           with:
-              context: src
-              file: src/Dockerfile
-              platforms: linux/${{ matrix.arch }}
-              tags: |
-                ${{ env.VERSIONED_IMAGE_FQN }}
-                ${{ env.LATEST_IMAGE_FQN }}
-              load: true
-              push: false
+            context: src
+            file: src/Dockerfile
+            platforms: linux/${{ matrix.arch }}
+            tags: |
+              ${{ env.VERSIONED_IMAGE_FQN }}
+              ${{ env.LATEST_IMAGE_FQN }}
+            load: true
+            push: false
 
         - name: Run integration tests
           env:
