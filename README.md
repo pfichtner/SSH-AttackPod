@@ -6,13 +6,13 @@ The NetWatch SSH-AttackPod is a modified OpenSSH server that records any attempt
 To be able to run a SSH-AttackPod you need: 
 
  - to have [Docker installed](#1-installation-of-docker)
- - [obtain a API-key](#1-obtain-a-api-key-from-netwatch)
+ - [obtain an API-key](#1-obtain-a-api-key-from-netwatch)
  - public IP address: If the system you are running SSH-AttackPod on is not reachable over the internet you have to configure port forwarding on your firewall
 
  
-#### 1. Obtain a API-key from [Netwatch](https://community.netwatch.team/)
+#### 1. Obtain an API-key from [Netwatch](https://community.netwatch.team/)
 
-To run a SSH-AttackPod you need an API-key to be able to submit your results. To request a API-key:
+To run a SSH-AttackPod you need an API-key to be able to submit your results. To request an API-key:
 
  - Go to [NetWatch community](https://community.netwatch.team/)
  - Click: **Join the community**. 
@@ -20,7 +20,7 @@ To run a SSH-AttackPod you need an API-key to be able to submit your results. To
 
 #### 2. Download the SSH-AttackPod
 
-To download the SSH-AttackPod and all nessessary files clone the repository from Github.
+To download the SSH-AttackPod and all necessary files clone the repository from Github.
 
 ```bash
 git clone https://github.com/NetWatch-team/SSH-AttackPod.git
@@ -47,7 +47,7 @@ In the cloned repository copy the file `template.env` to `.env` and populated wi
     ```
 
 #### 4. Start the SSH-AttackPod in test-mode
-To start the container, run the following commands *in the directory where the repository resides with the file:* `docker-compse.yml` *\[. e.g.:* `~/SSH-AttackPod`*\]*.
+To start the container, run the following commands *in the directory where the repository resides with the file:* `docker-compose.yml` *\[. e.g.:* `~/SSH-AttackPod`*\]*.
 
 This command will start the docker container detached and when successfull it will show the logs for this docker container. 
 
@@ -72,7 +72,7 @@ When you're finished reviewing, you can stop the log output with `[Ctrl-C]`.
 
 ## Testing the SSH-AttackPod
 
-When your SSH-AttackPod is running, all login attempts are being send to the Netwatch project. **This may include any attempt of you to test the system or when you try to login with your normal username and passowrd for your system!**
+When your SSH-AttackPod is running, all login attempts are being send to the Netwatch project. **This may include any attempt of you to test the system or when you try to login with your normal username and password for your system!**
 
 If you want to test whether the AttackPod is working as expected, you can enable *TEST_MODE* by adding NETWATCH_TEST_MODE=true to your `.env` file. This will configure the AttackPod to register and submit the attacks, but the backend will discard them and not take further action.
 
