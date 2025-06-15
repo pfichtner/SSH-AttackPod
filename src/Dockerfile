@@ -1,11 +1,13 @@
 # Stage 1: Build stage
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:24.04 AS builder
 
 # Set environment variable for non-interactive installations
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Enable 'deb-src' entries and install dependencies
-RUN sed -i -e 's/^# deb-src/deb-src/' /etc/apt/sources.list && \
+RUN echo "deb-src http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb-src http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb-src http://archive.ubuntu.com/ubuntu noble-security main restricted universe multiverse" >> /etc/apt/sources.list && \
     apt-get update && \
     apt-get install --no-install-recommends -y \
         build-essential \
@@ -26,7 +28,7 @@ RUN sed -i -e 's/^# deb-src/deb-src/' /etc/apt/sources.list && \
     apt-get clean && apt-get autoremove -y
 
 # Stage 2: Runtime stage
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Set environment variable for non-interactive installations
 ENV DEBIAN_FRONTEND=noninteractive
@@ -58,13 +60,29 @@ USER appuser
 
 # Copy runtime requirements and install them
 COPY requirements.txt /home/appuser/code/
-RUN pip install --no-cache-dir -r requirements.txt --user
+
+# Install python3-venv (required for creating venv)
+USER root
+RUN apt-get update && apt-get install -y python3-venv && rm -rf /var/lib/apt/lists/*
+
+# Back to appuser for security
+USER appuser
+
+# Create virtual environment and install dependencies
+RUN python3 -m venv /home/appuser/venv && \
+    /home/appuser/venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# Use venv Python and pip as default
+ENV PATH="/home/appuser/venv/bin:$PATH"
 
 # Copy application code
 COPY monitor.py /home/appuser/code/
 
 # Expose SSH port
 EXPOSE 22
+
+# Report the version of the openSSH server
+RUN sshd -V
 
 # Command to run your application
 CMD ["python3", "monitor.py"]
